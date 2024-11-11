@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خرس تعاملی</title>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+
+        #bear {
+            width: 200px; /* عرض تصویر خرس */
+            transition: transform 0.1s; /* انیمیشن برای تکان دادن */
+            cursor: pointer; /* نشانگر موس */
+        }
+
+        #score {
+            font-size: 2em; /* اندازه متن امتیاز */
+            margin-bottom: 20px; /* فاصله از تصویر */
+        }
+
+        #rocket {
+            margin-top: 20px;
+            width: 50px;
+            height: 50px;
+            background: url('https://cdn-icons-png.flaticon.com/512/866/866144.png') no-repeat center center;
+            background-size: contain;
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out;
+        }
+
+        #rocket:active {
+            transform: scale(1.2);
+        }
+
+        #rocket-holding {
+            background-color: #f19e36; /* رنگ پس زمینه برای نگه داشتن موشک */
+        }
+
+        #timer {
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">امتیاز: 0</div>
+    <img src="https://images.pexels.com/photos/1851164/pexels-photo-1851164.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="خرس" id="bear" onclick="addScore()">
+    <div id="rocket" onmousedown="startBoost()" onmouseup="stopBoost()" onmouseleave="stopBoost()"></div>
+    <div id="timer">زمان باقی‌مانده: 5:00</div>
+
+    <script>
+        let score = 0; // متغیر امتیاز
+        let boosting = false; // وضعیت نگه داشتن موشک
+        let boostTimer;
+        let countdownTimer;
+        let countdownTime = 300; // 5 دقیقه = 300 ثانیه
+        let boostDuration = 10; // مدت زمان افزایش سریع امتیاز (10 ثانیه)
+        let isBoosting = false;
+
+        function addScore() {
+            score += 5; // افزایش امتیاز به مقدار 5
+            document.getElementById('score').innerText = "امتیاز: " + score; // به‌روزرسانی امتیاز
+
+            // تکان دادن خرس
+            const bear = document.getElementById('bear');
+            bear.style.transform = "scale(1.1)"; // بزرگ کردن تصویر
+            setTimeout(() => {
+                bear.style.transform = "scale(1)"; // بازگشت به حالت عادی
+            }, 100); // بازگشت به حالت عادی بعد از 100 میلی‌ثانیه
+        }
+
+        function startBoost() {
+            if (isBoosting) return; // جلوگیری از شروع مجدد اگر در حال افزایش امتیاز هستیم
+            isBoosting = true;
+            document.getElementById('rocket').classList.add("rocket-holding"); // تغییر رنگ دکمه موشک
+            let boostEndTime = Date.now() + boostDuration * 1000; // زمان پایان افزایش امتیاز (10 ثانیه)
+
+            boostTimer = setInterval(() => {
+                if (Date.now() > boostEndTime) {
+                    stopBoost(); // بعد از 10 ثانیه متوقف می‌شود
+                } else {
+                    score += 10; // افزایش سریع امتیاز
+                    document.getElementById('score').innerText = "امتیاز: " + score;
+                }
+            }, 100); // هر 100 میلی‌ثانیه امتیاز به 10 افزایش پیدا می‌کند
+        }
+
+        function stopBoost() {
+            isBoosting = false; // غیرفعال شدن حالت افزایش امتیاز سریع
+            document.getElementById('rocket').classList.remove("rocket-holding"); // بازگشت رنگ دکمه موشک
+            clearInterval(boostTimer); // متوقف کردن افزایش سریع امتیاز
+        }
+
+        function updateTimer() {
+            let minutes = Math.floor(countdownTime / 60);
+            let seconds = countdownTime % 60;
+            document.getElementById('timer').innerText = `زمان باقی‌مانده: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+            countdownTime--;
+
+            if (countdownTime < 0) {
+                startBoost(); // شروع افزایش امتیاز
+                countdownTime = 300; // تنظیم مجدد تایمر به 5 دقیقه
+            }
+        }
+
+        setInterval(updateTimer, 1000); // به‌روزرسانی تایمر هر ثانیه
+
+        // شروع تایمر از ابتدا
+        setInterval(() => {
+            startBoost(); // هر 5 دقیقه یکبار شروع می‌شود
+        }, 300000); // 5 دقیقه = 300000 میلی‌ثانیه
+    </script>
+</body>
+</html>
